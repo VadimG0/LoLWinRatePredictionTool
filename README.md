@@ -4,7 +4,7 @@ A tool for predicting win rates in League of Legends
 
 ### **Project Task Overview: League of Legends Win Rate Prediction Tool**
 
-#### **1\. Project Planning & Requirements Gathering**
+~~#### **1\. Project Planning & Requirements Gathering**~~
 
 -   Define the **scope and objectives** of the project.
 -   Identify the **key data mining techniques** to be used.
@@ -13,7 +13,7 @@ A tool for predicting win rates in League of Legends
 
 #### **2\. Data Collection & Storage**
 
--   **API Integration**: Fetch match history, champion stats, win rates, item builds, etc.
+~~-   **API Integration**: Fetch match history, champion stats, win rates, item builds, etc.~~
 -   **Database Setup**: Store raw and processed match data (SQL or NoSQL).
 -   **Data Preprocessing**:
     -   Handle missing values, duplicates, and inconsistencies.
