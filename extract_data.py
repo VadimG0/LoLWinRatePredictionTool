@@ -12,10 +12,10 @@ HEADERS = {
     "X-Riot-Token": RIOT_API_KEY
 }
 REGION = "americas"
-MAX_MATCHES = 500  # Target total number of unique matches
+MAX_MATCHES = 1000  # Target total number of unique matches
 SAVE_INTERVAL = 5  # Save to CSV every 5 matches
 RANKED_SOLO_DUO_QUEUE_ID = 420  # Queue ID for Ranked Solo/Duo
-CSV_FILENAME = "datasets/ranked_solo_duo_matchups.csv"  # Fixed CSV filename
+CSV_FILENAME = "datasets/ranked_solo_duo_matchups.csv"
 REMAKE_THRESHOLD = 180  # Minimum game duration in seconds to consider a match valid (3 minutes)
 
 def get_match_ids(puuid, count=5):
