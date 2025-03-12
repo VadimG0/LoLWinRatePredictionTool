@@ -1,9 +1,7 @@
 import os
 from dotenv import load_dotenv
 import requests
-import json
 import pandas as pd
-from datetime import datetime
 
 # Load environment variables
 load_dotenv()
@@ -179,7 +177,7 @@ def main():
 
     # Step 1: Get initial PUUID
     response = requests.get(
-        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/DawnBrigade1/NA1',
+        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Kissing Bandits/NA1',
         headers=HEADERS
     )
 
