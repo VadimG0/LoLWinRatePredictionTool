@@ -19,7 +19,7 @@ A tool for predicting win rates in League of Legends
     -   Handle missing values, duplicates, and inconsistencies.
     -   Normalize and structure data for easy analysis.
 
-#### **3\. Data Mining & Feature Engineering**
+#### ~~**3\. Data Mining & Feature Engineering**~~
 
 -   **Extract key features** (e.g., champion synergy, counter-picks, item effectiveness).
 -   Apply **association rule mining** to discover patterns in winning teams.
