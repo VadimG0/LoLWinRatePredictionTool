@@ -10,7 +10,7 @@ HEADERS = {
     "X-Riot-Token": RIOT_API_KEY
 }
 REGION = "americas"
-MAX_MATCHES = 1000  # Target total number of unique matches
+MAX_MATCHES = 1500  # Target total number of unique matches
 SAVE_INTERVAL = 5  # Save to CSV every 5 matches
 RANKED_SOLO_DUO_QUEUE_ID = 420  # Queue ID for Ranked Solo/Duo
 CSV_FILENAME = "datasets/ranked_solo_duo_matchups.csv"
@@ -177,7 +177,7 @@ def main():
 
     # Step 1: Get initial PUUID
     response = requests.get(
-        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/Kissing Bandits/NA1',
+        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/ketamilie/JUNI',
         headers=HEADERS
     )
 

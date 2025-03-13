@@ -68,7 +68,7 @@ class MatchDataAnalyzer:
 
         # Filter and sort rules
         single_consequent_rules = rules[rules['consequents'].apply(lambda x: len(x) == 1)]
-        top_rules = single_consequent_rules.sort_values(by=['lift', 'confidence'], ascending=False)
+        top_rules = single_consequent_rules.sort_values(by=['support', 'confidence'], ascending=False)
         return top_rules
 
     def save_to_csv(self, df, filename):
