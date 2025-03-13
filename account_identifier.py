@@ -10,7 +10,7 @@ HEADERS = {
 }
 REGION = "americas"  # Use "americas", "asia", or "europe" for the account endpoint
 
-def convert_puuid_to_riotid(puuid):     # (e.g. "iqclScuTpL1qEaHBL6o-VxUmtH-YHr97lIOvGIeP8j8QCnnBwv5CEwrUrKruD60evV-bBuEkq4H72w")
+def convert_puuid_to_riotid(puuid) -> str:     # (e.g. "iqclScuTpL1qEaHBL6o-VxUmtH-YHr97lIOvGIeP8j8QCnnBwv5CEwrUrKruD60evV-bBuEkq4H72w")
     # Make the request to get Riot ID (gameName and tagLine)
     response = requests.get(
         f"https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-puuid/{puuid}",
@@ -28,7 +28,7 @@ def convert_puuid_to_riotid(puuid):     # (e.g. "iqclScuTpL1qEaHBL6o-VxUmtH-YHr9
         print(response.text)
         return
     
-def convert_riotid_to_puuid(gameName, tagLine):     # (e.g. Ballas, 5555)
+def convert_riotid_to_puuid(gameName, tagLine) -> str:     # (e.g. Ballas, 5555)
     # Make the request to get PUUID
     response = requests.get(
         f"https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}",  

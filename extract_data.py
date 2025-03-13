@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import requests
+import numpy as np
 import pandas as pd
 
 load_dotenv()
@@ -16,7 +17,7 @@ RANKED_SOLO_DUO_QUEUE_ID = 420  # Queue ID for Ranked Solo/Duo
 CSV_FILENAME = "data/ranked_solo_duo_matchups.csv"
 REMAKE_THRESHOLD = 180  # Minimum game duration in seconds to consider a match valid (3 minutes)
 
-def get_match_ids(puuid, count=MATCHES_PER_PUUID):
+def get_match_ids(puuid, count=MATCHES_PER_PUUID) -> dict:
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
     params = {"queue": RANKED_SOLO_DUO_QUEUE_ID, "count": count}  # Filter by Ranked Solo/Duo
 
@@ -27,7 +28,7 @@ def get_match_ids(puuid, count=MATCHES_PER_PUUID):
         response.raise_for_status()
         return
 
-def get_match_details(match_id):
+def get_match_details(match_id) -> dict:
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/{match_id}"
     response = requests.get(url, headers=HEADERS)
     if response.status_code == 200:
@@ -36,7 +37,7 @@ def get_match_details(match_id):
         response.raise_for_status()
         return
 
-def extract_lane_matchups(match_data, match_id):
+def extract_lane_matchups(match_data, match_id) -> list[dict]:
     lane_matchups = {'TOP': [], 'MIDDLE': [], 'JUNGLE': [], 'BOTTOM': [], 'UTILITY': []}
 
     # Extract bans from teams
@@ -129,14 +130,14 @@ def extract_lane_matchups(match_data, match_id):
     
     return lane_pairings
 
-def save_to_csv(all_matchups, filename, append=True):
+def save_to_csv(all_matchups, filename, append=True) -> None:
     df = pd.DataFrame(all_matchups)
     mode = 'a' if append and os.path.exists(filename) else 'w'
     header = not (append and os.path.exists(filename))
     df.to_csv(filename, mode=mode, header=header, index=False)
     print(f"Data appended to {filename}")
 
-def load_existing_match_ids(filename):
+def load_existing_match_ids(filename) -> set[np.ndarray]:
     if os.path.exists(filename):
         df = pd.read_csv(filename)
         if 'match_id' in df.columns and not df.empty:
@@ -155,12 +156,12 @@ def load_existing_match_ids(filename):
         pd.DataFrame(columns=columns).to_csv(filename, index=False)
     return set()
 
-def extract_matches_data(puuid, all_match_ids, all_puuids):
+def extract_matches_data(puuid, all_match_ids, all_puuids) -> tuple[set[str], set[str]]:
     all_matchups = []
     # Step 1: Get match IDs (Ranked Solo/Duo only)
     match_ids = get_match_ids(puuid)
     if not match_ids:
-        return None, None, None
+        return None, None
 
     print(f"Ranked Solo/Duo Match IDs: {match_ids}")
 
@@ -172,7 +173,7 @@ def extract_matches_data(puuid, all_match_ids, all_puuids):
 
         match_details = get_match_details(match_id)
         if not match_details:
-            return None, None, None
+            return None, None
         
         if match_details and match_details['info']['queueId'] != RANKED_SOLO_DUO_QUEUE_ID:
             print(f"Skipping match ID {match_id} (not Ranked Solo/Duo or error)")
@@ -198,9 +199,9 @@ def extract_matches_data(puuid, all_match_ids, all_puuids):
                 save_to_csv(all_matchups, CSV_FILENAME)
                 all_matchups = []  # Clear after saving to avoid duplicates in memory
 
-    return puuid, all_match_ids, all_puuids
+    return all_match_ids, all_puuids
     
-def extract_ranked_solo_duo_data(riot_id):
+def extract_ranked_solo_duo_data(riot_id) -> None:
     all_match_ids = load_existing_match_ids(CSV_FILENAME)  # Load existing match IDs from CSV
     all_puuids = set()
     processed_puuids = set()  # Track processed PUUIDs to avoid duplicates
@@ -226,7 +227,7 @@ def extract_ranked_solo_duo_data(riot_id):
         if current_puuid in processed_puuids:
             continue
         
-        puuid, all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids)
+        all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids)
         
         processed_puuids.add(current_puuid)
         print(f"Total unique Ranked Solo/Duo matches processed: {len(all_match_ids)}, PUUIDs left to process: {len(all_puuids)}")

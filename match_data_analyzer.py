@@ -15,7 +15,7 @@ class MatchDataAnalyzer:
             'loser_champion': list
         }).reset_index()
 
-    def calculate_win_rates(self):
+    def calculate_win_rates(self) -> pd.DataFrame:
         """Calculate win rates for champion-opponent pairs."""
         wins = defaultdict(int)
         total = defaultdict(int)
@@ -52,7 +52,7 @@ class MatchDataAnalyzer:
         win_rates_df = pd.DataFrame(results).sort_values(by=['Total Matches', 'Win Rate (%)'], ascending=False)
         return win_rates_df
 
-    def compute_association_rules(self, min_support=0.005, min_threshold=0.1):
+    def compute_association_rules(self, min_support=0.005, min_threshold=0.1) -> pd.DataFrame:
         """Compute association rules for winning teams."""
         # Group by match_id to get winning teams
         winning_teams = self.df.groupby('match_id')['winner_champion'].apply(list).reset_index(name='champions')
@@ -71,7 +71,7 @@ class MatchDataAnalyzer:
         top_rules = single_consequent_rules.sort_values(by=['support', 'confidence'], ascending=False)
         return top_rules
 
-    def save_to_csv(self, df, filename):
+    def save_to_csv(self, df, filename) -> None:
         """Save a DataFrame to a CSV file."""
         output_path = self.dataset_path.parent / filename
         df.to_csv(output_path, index=False)
