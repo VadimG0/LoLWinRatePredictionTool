@@ -80,7 +80,7 @@ class MatchDataAnalyzer:
 # Example usage
 if __name__ == "__main__":
     # Initialize the analyzer with the dataset
-    analyzer = MatchDataAnalyzer('datasets/ranked_solo_duo_matchups.csv')
+    analyzer = MatchDataAnalyzer('data/ranked_solo_duo_matchups.csv')
 
     # Calculate win rates and save
     win_rates = analyzer.calculate_win_rates()
