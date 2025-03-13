@@ -11,7 +11,7 @@ HEADERS = {
 }
 REGION = "americas"
 MAX_MATCHES = 1500  # Target total number of unique matches
-MATCHES_PER_PUUID = 7   # Higher Number results in more processed matches but increases bias
+MATCHES_PER_PUUID = 10   # Higher Number results in more processed matches but increases bias
 SAVE_INTERVAL = 1  # Save to CSV every match
 RANKED_SOLO_DUO_QUEUE_ID = 420  # Queue ID for Ranked Solo/Duo
 CSV_FILENAME = "data/ranked_solo_duo_matchups.csv"
@@ -230,7 +230,7 @@ def extract_ranked_solo_duo_data(riot_id) -> None:
         all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids)
         
         processed_puuids.add(current_puuid)
-        print(f"Total unique Ranked Solo/Duo matches processed: {len(all_match_ids)}, PUUIDs left to process: {len(all_puuids)}")
+        print(f"Total unique Ranked Solo/Duo matches processed: {len(all_match_ids)}\n")
 
 if __name__ == "__main__":
-    extract_ranked_solo_duo_data("Tammior/NA1")
+    extract_ranked_solo_duo_data("AkemiMoon8/NA1")
