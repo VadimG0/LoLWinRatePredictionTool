@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import requests
 import pandas as pd
 
-# Load environment variables
 load_dotenv()
 RIOT_API_KEY = os.getenv("RIOT_API_KEY")
 HEADERS = {
@@ -11,12 +10,13 @@ HEADERS = {
 }
 REGION = "americas"
 MAX_MATCHES = 1500  # Target total number of unique matches
-SAVE_INTERVAL = 5  # Save to CSV every 5 matches
+MATCHES_PER_PUUID = 7   # Higher Number results in more processed matches but increases bias
+SAVE_INTERVAL = 1  # Save to CSV every match
 RANKED_SOLO_DUO_QUEUE_ID = 420  # Queue ID for Ranked Solo/Duo
-CSV_FILENAME = "datasets/ranked_solo_duo_matchups.csv"
+CSV_FILENAME = "data/ranked_solo_duo_matchups.csv"
 REMAKE_THRESHOLD = 180  # Minimum game duration in seconds to consider a match valid (3 minutes)
 
-def get_match_ids(puuid, count=5):
+def get_match_ids(puuid, count=MATCHES_PER_PUUID):
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
     params = {"queue": RANKED_SOLO_DUO_QUEUE_ID, "count": count}  # Filter by Ranked Solo/Duo
 
@@ -24,9 +24,8 @@ def get_match_ids(puuid, count=5):
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Error: Failed to get match IDs for PUUID {puuid}. Status Code: {response.status_code}")
-        print(f"Response: {response.text}")
-        return None
+        response.raise_for_status()
+        return
 
 def get_match_details(match_id):
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/{match_id}"
@@ -34,9 +33,8 @@ def get_match_details(match_id):
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Error: Failed to get match details for {match_id}. Status Code: {response.status_code}")
-        print(f"Response: {response.text}")
-        return None
+        response.raise_for_status()
+        return
 
 def extract_lane_matchups(match_data, match_id):
     lane_matchups = {'TOP': [], 'MIDDLE': [], 'JUNGLE': [], 'BOTTOM': [], 'UTILITY': []}
@@ -140,22 +138,9 @@ def save_to_csv(all_matchups, filename, append=True):
 
 def load_existing_match_ids(filename):
     if os.path.exists(filename):
-        try:
-            df = pd.read_csv(filename)
-            if 'match_id' in df.columns and not df.empty:
-                return set(df['match_id'].unique())
-        except pd.errors.EmptyDataError:
-            print(f"CSV file {filename} is empty. Initializing with column names.")
-            # Create an empty DataFrame with the expected columns
-            columns = [
-                'match_id', 'lane', 'winner_puuid', 'winner_champion', 'loser_puuid', 'loser_champion',
-                'winner_primary_style', 'winner_primary_selections', 'winner_sub_style', 'winner_sub_selections',
-                'winner_stat_perks', 'winner_items', 'winner_summoner_spells',
-                'loser_primary_style', 'loser_primary_selections', 'loser_sub_style', 'loser_sub_selections',
-                'loser_stat_perks', 'loser_items', 'loser_summoner_spells',
-                'winner_bans', 'loser_bans'
-            ]
-            pd.DataFrame(columns=columns).to_csv(filename, index=False)
+        df = pd.read_csv(filename)
+        if 'match_id' in df.columns and not df.empty:
+            return set(df['match_id'].unique())
     else:
         print(f"CSV file {filename} does not exist. Creating with column names.")
         # Create an empty DataFrame with the expected columns
@@ -170,14 +155,59 @@ def load_existing_match_ids(filename):
         pd.DataFrame(columns=columns).to_csv(filename, index=False)
     return set()
 
-def main():
+def extract_matches_data(puuid, all_match_ids, all_puuids):
     all_matchups = []
+    # Step 1: Get match IDs (Ranked Solo/Duo only)
+    match_ids = get_match_ids(puuid)
+    if not match_ids:
+        return None, None, None
+
+    print(f"Ranked Solo/Duo Match IDs: {match_ids}")
+
+    # Step 2: Process matches
+    for match_id in match_ids:
+        if match_id in all_match_ids:
+            print(f"Match ID {match_id} already exists in CSV")
+            continue
+
+        match_details = get_match_details(match_id)
+        if not match_details:
+            return None, None, None
+        
+        if match_details and match_details['info']['queueId'] != RANKED_SOLO_DUO_QUEUE_ID:
+            print(f"Skipping match ID {match_id} (not Ranked Solo/Duo or error)")
+            continue
+
+        if match_details['info']['gameDuration'] < REMAKE_THRESHOLD:
+            print(f"Skipping match ID {match_id} (remade, duration: {match_details['info']['gameDuration']}s)")
+            continue
+        
+        lane_matchups = extract_lane_matchups(match_details, match_id)
+        if lane_matchups:
+            all_matchups.extend(lane_matchups)
+            all_match_ids.add(match_id)
+            print(f"Processed Ranked Solo/Duo match: {match_id}")
+            
+            # Collect PUUIDs from this match
+            for matchup in lane_matchups:
+                all_puuids.add(matchup['winner_puuid'])
+                all_puuids.add(matchup['loser_puuid'])
+
+            # Save every 5 matches
+            if len(all_match_ids) % SAVE_INTERVAL == 0:
+                save_to_csv(all_matchups, CSV_FILENAME)
+                all_matchups = []  # Clear after saving to avoid duplicates in memory
+
+    return puuid, all_match_ids, all_puuids
+    
+def extract_ranked_solo_duo_data(riot_id):
     all_match_ids = load_existing_match_ids(CSV_FILENAME)  # Load existing match IDs from CSV
     all_puuids = set()
+    processed_puuids = set()  # Track processed PUUIDs to avoid duplicates
 
     # Step 1: Get initial PUUID
     response = requests.get(
-        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/ketamilie/JUNI',
+        f'https://{REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{riot_id}',
         headers=HEADERS
     )
 
@@ -187,93 +217,19 @@ def main():
         print(f"Initial PUUID: {puuid}")
         all_puuids.add(puuid)
     else:
-        print(f"Error: Failed to get PUUID. Status Code: {response.status_code}")
-        print(f"Response: {response.text}")
+        response.raise_for_status()
         return
 
-    # Step 2: Get initial match IDs (Ranked Solo/Duo only)
-    match_ids = get_match_ids(puuid, count=20)
-    if not match_ids:
-        return
-
-    print(f"Initial Ranked Solo/Duo Match IDs: {match_ids}")
-
-    # Step 3: Process initial matches
-    for match_id in match_ids:
-        if match_id not in all_match_ids:
-            match_details = get_match_details(match_id)
-            if match_details and match_details['info']['queueId'] == RANKED_SOLO_DUO_QUEUE_ID:
-                # Skip remade matches
-                if match_details['info']['gameDuration'] < REMAKE_THRESHOLD:
-                    print(f"Skipping match ID {match_id} (remade, duration: {match_details['info']['gameDuration']}s)")
-                    continue
-                
-                lane_matchups = extract_lane_matchups(match_details, match_id)
-                if lane_matchups:
-                    all_matchups.extend(lane_matchups)
-                    all_match_ids.add(match_id)
-                    print(f"Processed Ranked Solo/Duo match: {match_id}")
-                    
-                    # Collect PUUIDs from this match
-                    for matchup in lane_matchups:
-                        all_puuids.add(matchup['winner_puuid'])
-                        all_puuids.add(matchup['loser_puuid'])
-
-                    # Save every 5 matches
-                    if len(all_match_ids) % SAVE_INTERVAL == 0:
-                        save_to_csv(all_matchups, CSV_FILENAME)
-                        all_matchups = []  # Clear after saving to avoid duplicates in memory
-            else:
-                print(f"Skipping match ID {match_id} (not Ranked Solo/Duo or error)")
-        else:
-            print(f"Match ID {match_id} already exists in CSV")
-
-    # Step 4: Expand to 500 unique Ranked Solo/Duo matches
-    processed_puuids = {puuid}  # Track processed PUUIDs to avoid duplicates
+    # Step 2: Expand to 1500 unique Ranked Solo/Duo matches
     while len(all_match_ids) < MAX_MATCHES and all_puuids:
         current_puuid = all_puuids.pop()  # Get a PUUID to process
         if current_puuid in processed_puuids:
             continue
         
-        match_ids = get_match_ids(current_puuid, count=1)  # Get 1 Ranked Solo/Duo match per PUUID
-        if match_ids:
-            for match_id in match_ids:
-                if match_id not in all_match_ids:
-                    match_details = get_match_details(match_id)
-                    if match_details and match_details['info']['queueId'] == RANKED_SOLO_DUO_QUEUE_ID:
-                        # Skip remade matches
-                        if match_details['info']['gameDuration'] < REMAKE_THRESHOLD:
-                            print(f"Skipping match ID {match_id} (remade, duration: {match_details['info']['gameDuration']}s)")
-                            continue
-                        
-                        lane_matchups = extract_lane_matchups(match_details, match_id)
-                        if lane_matchups:
-                            all_matchups.extend(lane_matchups)
-                            all_match_ids.add(match_id)
-                            print(f"Processed Ranked Solo/Duo match: {match_id}")
-                            
-                            # Collect new PUUIDs
-                            for matchup in lane_matchups:
-                                all_puuids.add(matchup['winner_puuid'])
-                                all_puuids.add(matchup['loser_puuid'])
-
-                            # Save every 5 matches
-                            if len(all_match_ids) % SAVE_INTERVAL == 0:
-                                save_to_csv(all_matchups, CSV_FILENAME)
-                                all_matchups = []  # Clear after saving
-                    else:
-                        print(f"Skipping match ID {match_id} (not Ranked Solo/Duo or error)")
-                else:
-                    print(f"Match ID {match_id} already exists in CSV")
+        puuid, all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids)
         
         processed_puuids.add(current_puuid)
-        print(f"Total unique Ranked Solo/Duo matches: {len(all_match_ids)}, PUUIDs left to process: {len(all_puuids)}")
-
-    # Step 5: Final save
-    if all_matchups:
-        save_to_csv(all_matchups, CSV_FILENAME)
-        print(f"\nFinal Ranked Solo/Duo matchups data appended to {CSV_FILENAME}")
-    print(f"Total unique Ranked Solo/Duo matches processed: {len(all_match_ids)}")
+        print(f"Total unique Ranked Solo/Duo matches processed: {len(all_match_ids)}, PUUIDs left to process: {len(all_puuids)}")
 
 if __name__ == "__main__":
-    main()
+    extract_ranked_solo_duo_data("Tammior/NA1")

@@ -26,7 +26,7 @@ def convert_puuid_to_riotid(puuid):     # (e.g. "iqclScuTpL1qEaHBL6o-VxUmtH-YHr9
     else:
         print(f"Error: {response.status_code}")
         print(response.text)
-        return None
+        return
     
 def convert_riotid_to_puuid(gameName, tagLine):     # (e.g. Ballas, 5555)
     # Make the request to get PUUID
@@ -41,9 +41,9 @@ def convert_riotid_to_puuid(gameName, tagLine):     # (e.g. Ballas, 5555)
     else:
         print(f"Error: {response.status_code}")
         print(response.text)
-        return None
+        return
 
 # Example usage
 if __name__=="__main__":
     # print(convert_riotid_to_puuid("Ballas", "5555"))
-    print(convert_puuid_to_riotid("XX0FwU10Sj2VbuUNwTEmqIiKr6ANSZQ6YMc1pAhcmOoWODAbavgaP3pBdxdlBl4hJz_54ra7JhBo3g"))
+    print(convert_puuid_to_riotid("4eCfyQAmoDoC62_mqbNn3_bW9IDyf7sZ2tNey2FQEyTGlkv-CtmZiUhz-S1d03aERMFreP69qpa_4A"))
