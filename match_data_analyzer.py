@@ -4,6 +4,11 @@ from collections import defaultdict
 from mlxtend.frequent_patterns import apriori, association_rules
 from mlxtend.preprocessing import TransactionEncoder
 
+# Replace the DataFrame initialization with:
+import sqlite3
+conn = sqlite3.connect('../data/lol_data.db')
+df = pd.read_sql_query("SELECT * FROM winners", conn)
+
 class MatchDataAnalyzer:
     def __init__(self, dataset_path):
         """Initialize with the path to the dataset."""
