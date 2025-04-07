@@ -46,4 +46,4 @@ def convert_riotid_to_puuid(gameName, tagLine) -> str:     # (e.g. Ballas, 5555)
 # Example usage
 if __name__=="__main__":
     # print(convert_riotid_to_puuid("Ballas", "5555"))
-    print(convert_puuid_to_riotid("4eCfyQAmoDoC62_mqbNn3_bW9IDyf7sZ2tNey2FQEyTGlkv-CtmZiUhz-S1d03aERMFreP69qpa_4A"))
+    print(convert_puuid_to_riotid("LfGA2aK7dA4f3svAeeYLagGmJfc96ruGSeoldDmysE5T_NBK34rdET7lpdYdp5cmN5l6xajx-XZ9pA"))
