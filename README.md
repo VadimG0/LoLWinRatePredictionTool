@@ -15,7 +15,7 @@ A tool for predicting win rates in League of Legends
 
 -   **API Integration**: Fetch match history, champion stats, win rates, item builds, etc.
 -   **Database Setup**: Store raw and processed match data (SQL or NoSQL).
--   **Data Preprocessing**:~~
+-   **Data Preprocessing**:
     -   Handle missing values, duplicates, and inconsistencies.
     -   Normalize and structure data for easy analysis.
 
