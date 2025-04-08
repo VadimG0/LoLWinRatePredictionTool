@@ -59,26 +59,33 @@ def load_existing_match_ids(db_path=DB_PATH):
     return match_ids
 
 def display_database_contents(db_path=DB_PATH):
-    """Display the contents of the matchups table in a readable format."""
+    """Display the total number of records and the last 10 added records in the matchups table."""
     if not db_path.exists():
         print(f"No database found at {db_path}. Run the data extraction script first.")
         return
 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM matchups")
+
+    cursor.execute("SELECT COUNT(*) FROM matchups")
+    total_records = cursor.fetchone()[0]
+
+    cursor.execute("SELECT * FROM matchups ORDER BY ROWID DESC LIMIT 10")
     rows = cursor.fetchall()
     column_names = [description[0] for description in cursor.description]
 
+    print(f"\nTotal records in 'matchups' table: {total_records}\n")
+    
     if not rows:
-        print("Database is empty.")
+        print("No records found in the database.")
     else:
-        print(f"\nDisplaying {len(rows)} rows from the 'matchups' table:\n")
+        print("Displaying the last 10 added records:\n")
         print("-" * 80)
         for row in rows:
             for name, value in zip(column_names, row):
                 print(f"{name}: {value}")
             print("-" * 80)
+
     conn.close()
 
 if __name__ == "__main__":
