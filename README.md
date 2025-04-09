@@ -11,11 +11,11 @@ A tool for predicting win rates in League of Legends
 -   Research and register for the **Riot Games API** or alternative data sources.
 -   Select the **tech stack** (backend, frontend, database, and machine learning frameworks).
 
-#### **2\. Data Collection & Storage**
+#### ~~**2\. Data Collection & Storage**~~
 
--   ~~**API Integration**: Fetch match history, champion stats, win rates, item builds, etc.~~
+-   **API Integration**: Fetch match history, champion stats, win rates, item builds, etc.
 -   **Database Setup**: Store raw and processed match data (SQL or NoSQL).
--   ~~**Data Preprocessing**:~~
+-   **Data Preprocessing**:
     -   Handle missing values, duplicates, and inconsistencies.
     -   Normalize and structure data for easy analysis.
 
