@@ -1,5 +1,5 @@
 import requests
-from api import get_match_ids, get_match_details, extract_player_data
+from api import get_match_ids, get_match_details, extract_player_data, RateLimitExceeded
 from database import setup_database, save_to_database, load_existing_match_ids
 from config import REGION, HEADERS, MAX_MATCHES, REMAKE_THRESHOLD, RANKED_SOLO_DUO_QUEUE_ID, DB_PATH
 
@@ -56,14 +56,19 @@ def extract_ranked_solo_duo_data(riot_id):
     print(f"Initial PUUID: {puuid}")
     all_puuids.add(puuid)
 
-    while len(all_match_ids) < MAX_MATCHES and all_puuids:
-        current_puuid = all_puuids.pop()
-        if current_puuid in processed_puuids:
-            continue
+    try:
+        while len(all_match_ids) < MAX_MATCHES and all_puuids:
+            current_puuid = all_puuids.pop()
+            if current_puuid in processed_puuids:
+                continue
 
-        all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids, DB_PATH)
-        processed_puuids.add(current_puuid)
-        print(f"Total unique matches processed: {len(all_match_ids)}\n")
+            all_match_ids, all_puuids = extract_matches_data(current_puuid, all_match_ids, all_puuids, DB_PATH)
+            processed_puuids.add(current_puuid)
+            print(f"Total unique matches processed: {len(all_match_ids)}\n")
+    except RateLimitExceeded as e:
+        print(f"Stopping data extraction: {e}")
+        print(f"Collected {len(all_match_ids)} matches before hitting persistent rate limit")
+        return
 
 if __name__ == "__main__":
-    extract_ranked_solo_duo_data("AkemiMoon8/NA1")
+    extract_ranked_solo_duo_data("NAsorryk1ng/NA1")

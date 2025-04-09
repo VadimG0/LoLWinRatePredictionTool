@@ -1,19 +1,47 @@
 import requests
+import time
 from config import REGION, HEADERS, MATCHES_PER_PUUID, RANKED_SOLO_DUO_QUEUE_ID
 
+class RateLimitExceeded(Exception):
+    """Custom exception for persistent rate limit issues."""
+    pass
+
+def api_request(url, headers=HEADERS, params=None, retries=3):
+    """Generic API request handler with rate limit retry logic."""
+    for attempt in range(retries):
+        response = requests.get(url, headers=headers, params=params)
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 429:  # Rate limit exceeded
+            retry_after = int(response.headers.get('Retry-After', 1))  # Default to 1s if header missing
+            print(f"Rate limit exceeded. Waiting {retry_after} seconds (Attempt {attempt + 1}/{retries})")
+            time.sleep(retry_after)
+        else:
+            print(f"API error: {response.status_code} - {response.text}")
+            return None
+    raise RateLimitExceeded(f"Rate limit exceeded after {retries} retries")
+
 def get_match_ids(puuid, count=MATCHES_PER_PUUID):
+    """Get match IDs for a PUUID with rate limit handling."""
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
     params = {"queue": RANKED_SOLO_DUO_QUEUE_ID, "count": count}
-    response = requests.get(url, headers=HEADERS, params=params)
-    return response.json() if response.status_code == 200 else []
+    try:
+        return api_request(url, params=params)
+    except RateLimitExceeded as e:
+        print(e)
+        return []
 
 def get_match_details(match_id):
+    """Get match details for a match ID with rate limit handling."""
     url = f"https://{REGION}.api.riotgames.com/lol/match/v5/matches/{match_id}"
-    response = requests.get(url, headers=HEADERS)
-    return response.json() if response.status_code == 200 else None
+    try:
+        return api_request(url)
+    except RateLimitExceeded as e:
+        print(e)
+        return None
 
 def extract_player_data(match_data, match_id):
-    # Same as in Modified Version 1
+    """Extract player data from match details (unchanged)."""
     player_data = []
     teams = match_data['info']['teams']
     team_bans = {team['teamId']: [ban['championId'] for ban in team['bans']] for team in teams}
