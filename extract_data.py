@@ -24,6 +24,15 @@ def extract_matches_data(puuid, all_match_ids, all_puuids, db_path):
             continue
 
         player_data = extract_player_data(match_details, match_id)
+        if len(player_data) != 10:
+            print(f"Skipping match ID {match_id} (incomplete data: {len(player_data)} players)")
+            continue
+        
+        lanes = [player['lane'] for player in player_data]
+        if 'Invalid' in lanes:
+            print(f"Skipping match ID {match_id} (contains 'Invalid' lane)")
+            continue
+
         save_to_database(player_data, db_path)
         all_match_ids.add(match_id)
         for player in player_data:
@@ -71,4 +80,4 @@ def extract_ranked_solo_duo_data(riot_id):
         return
 
 if __name__ == "__main__":
-    extract_ranked_solo_duo_data("NAsorryk1ng/NA1")
+    extract_ranked_solo_duo_data("Ballas/5555")

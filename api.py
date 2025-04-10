@@ -41,15 +41,46 @@ def get_match_details(match_id):
         return None
 
 def extract_player_data(match_data, match_id):
-    """Extract player data from match details (unchanged)."""
+    """Extract player data from match details, replacing 'Invalid' lanes with the missing lane."""
     player_data = []
     teams = match_data['info']['teams']
     team_bans = {team['teamId']: [ban['championId'] for ban in team['bans']] for team in teams}
-    for participant in match_data['info']['participants']:
+    
+    # Define valid lanes
+    all_lanes = {'TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'}
+    
+    # Collect lanes for each team
+    team1_lanes = []  # First 5 participants (teamId 100 typically)
+    team2_lanes = []  # Last 5 participants (teamId 200 typically)
+    for i, participant in enumerate(match_data['info']['participants']):
+        lane = participant['individualPosition']
+        if i < 5:
+            team1_lanes.append(lane)
+        else:
+            team2_lanes.append(lane)
+    
+    # Replace 'Invalid' with missing lane for each team
+    for i, participant in enumerate(match_data['info']['participants']):
+        lane = participant['individualPosition']
+        if lane == 'Invalid':
+            # Determine team and fix lane
+            if i < 5:  # Team 1
+                used_lanes = set(team1_lanes) - {'Invalid'}
+                missing_lane = (all_lanes - used_lanes).pop()
+                lane = missing_lane
+                team1_lanes[i] = lane  # Update the list for consistency
+                print(f"Match {match_id}: Replaced 'Invalid' with '{lane}' for Team 1 participant {i+1}")
+            else:  # Team 2
+                used_lanes = set(team2_lanes) - {'Invalid'}
+                missing_lane = (all_lanes - used_lanes).pop()
+                lane = missing_lane
+                team2_lanes[i - 5] = lane  # Update the list for consistency
+                print(f"Match {match_id}: Replaced 'Invalid' with '{lane}' for Team 2 participant {i-4}")
+        
         perks = participant['perks']
         player_data.append({
             'match_id': match_id,
-            'lane': participant['individualPosition'],
+            'lane': lane,
             'puuid': participant['puuid'],
             'champion': participant['championName'],
             'winner': 1 if participant['win'] else 0,
@@ -65,4 +96,5 @@ def extract_player_data(match_data, match_id):
             }),
             'team_bans': str(team_bans[participant['teamId']])
         })
+    
     return player_data
