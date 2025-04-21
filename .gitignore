@@ -1,6 +1,5 @@
 .env
 last_riotID.csv
-data/
 __pycache__/
 .venv/
 .env
