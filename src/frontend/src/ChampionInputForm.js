@@ -32,14 +32,15 @@ const championNames = [
     "Zed", "Zeri", "Ziggs", "Zilean", "Zoe", "Zyra"
 ]
 
-export default function ChampionInputForm() {
+export default function ChampionInputForm({ onChampionSelect, activeTeam, activeRole }) {
     const [selectedChampion, setSelectedChampion] = useState(null);
     const [inputValue, setInputValue] = useState('');
 
     const handleSubmit = () => {
-        if (selectedChampion) {
+        if (selectedChampion && activeTeam && activeRole) {
             console.log(`Selected champion: ${selectedChampion}`);
             // Placeholder for backend call
+            onChampionSelect( activeTeam, activeRole, selectedChampion )
         }
     };
 
@@ -104,16 +105,27 @@ export default function ChampionInputForm() {
                             '&.Mui-focused fieldset': {
                                 borderColor: '#EDDC91',
                             },
-                            // '& .MuiOutlinedInput-input': {
-                            //     color: '#fff',
-                            // },
+                            '& .MuiOutlinedInput-input': {
+                                color: '#fff',
+                            },
                         },
                         '& label.Mui-focused': {
                             color: '#EDDC91',
                         },
-                        // '& label': {
-                        //     color: '#fff', 
-                        // },
+                        '& label': {
+                            color: '#AAAAAA', 
+                        },
+                        '& .MuiAutocomplete-popupIndicator': {
+                            color: 'white',
+                        },
+                        // change popup Indicator to #EDDC91 when open
+                        '& .MuiAutocomplete-popupIndicatorOpen': {
+                            color: '#EDDC91',
+                        },
+                        '& .MuiAutocomplete-clearIndicator': {
+                            color: '#EDDC91',
+                        },
+                        backgroundColor: '#2B2B2B',
                     }}
                 />
             </Box>

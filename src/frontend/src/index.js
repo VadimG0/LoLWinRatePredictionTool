@@ -16,7 +16,6 @@ root.render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Navbar />
-      <ChampionInputForm />
       <TeamLayout />
     </ThemeProvider>
   </React.StrictMode>

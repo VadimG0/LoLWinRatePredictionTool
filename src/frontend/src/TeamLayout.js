@@ -23,6 +23,7 @@ export default function TeamLayout() {
         } else {
             setRedTeam((prev) => ({ ...prev, [role]: champion }));
         }
+        // Reset the active team and role after selection
         setActiveTeam(null);
         setActiveRole(null);
     };
@@ -33,13 +34,21 @@ export default function TeamLayout() {
     };
 
     return (
-        <Box sx={{ padding: 4 }}>
-            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" mt={4}>
+        <Box sx={{ padding: 2 }}>
+            <ChampionInputForm 
+                onChampionSelect={handleChampionSelect}
+                activeTeam={activeTeam}
+                activeRole={activeRole}
+            />            
+            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" mt={6}>
                 <TeamColumn
                     teamName="Blue Team"
                     teamColor="#1F2B44"
                     textColor="#3A9BDC"
                     champions={blueTeam}
+                    onRoleClick={handleRoleClick}
+                    activeTeam={activeTeam}
+                    activeRole={activeRole}
                 />
                 <StatisticsPanel />
                 <TeamColumn
@@ -47,6 +56,9 @@ export default function TeamLayout() {
                     teamColor="#3A1F2E"
                     textColor="#E26565"
                     champions={redTeam}
+                    onRoleClick={handleRoleClick}
+                    activeTeam={activeTeam}
+                    activeRole={activeRole}
                 />
             </Stack>
         </Box>
