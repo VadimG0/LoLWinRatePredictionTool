@@ -98,15 +98,22 @@ export default function ChampionInputForm() {
                               )
                             : options
                     }
+
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             '&.Mui-focused fieldset': {
                                 borderColor: '#EDDC91',
                             },
+                            // '& .MuiOutlinedInput-input': {
+                            //     color: '#fff',
+                            // },
                         },
                         '& label.Mui-focused': {
                             color: '#EDDC91',
                         },
+                        // '& label': {
+                        //     color: '#fff', 
+                        // },
                     }}
                 />
             </Box>

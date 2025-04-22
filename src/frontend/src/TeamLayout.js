@@ -33,25 +33,13 @@ export default function TeamLayout() {
     };
 
     return (
-        <Box sx={{ backgroundColor: '#1C2526', minHeight: '100vh', padding: 4 }}>
-            <Typography
-                variant="h4"
-                sx={{ color: '#EDDC91', textAlign: 'center', mb: 4, fontWeight: 600 }}
-            >
-                League of Legends Prediction Tool
-            </Typography>
-            <ChampionInputForm
-                onChampionSelect={handleChampionSelect}
-                activeTeam={activeTeam}
-                activeRole={activeRole}
-            />
+        <Box sx={{ padding: 4 }}>
             <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" mt={4}>
                 <TeamColumn
                     teamName="Blue Team"
-                    teamColor="#162341"
-                    textColor="#4EC8F0"
+                    teamColor="#1F2B44"
+                    textColor="#3A9BDC"
                     champions={blueTeam}
-                    onRoleClick={handleRoleClick}
                 />
                 <StatisticsPanel />
                 <TeamColumn
@@ -59,7 +47,6 @@ export default function TeamLayout() {
                     teamColor="#3A1F2E"
                     textColor="#E26565"
                     champions={redTeam}
-                    onRoleClick={handleRoleClick}
                 />
             </Stack>
         </Box>

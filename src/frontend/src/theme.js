@@ -7,7 +7,7 @@ const theme = createTheme({
   palette: {
     // Optional: add your brand colors here
     background: {
-      default: 'white',
+      default: '#1A1A1A',
     },
   },
 });

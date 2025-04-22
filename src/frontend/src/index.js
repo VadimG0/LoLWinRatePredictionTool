@@ -8,6 +8,8 @@ import App from './App';
 import ChampionInputForm from './ChampionInputForm';
 import TeamLayout from './TeamLayout';
 
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
@@ -15,6 +17,7 @@ root.render(
       <CssBaseline />
       <Navbar />
       <ChampionInputForm />
+      <TeamLayout />
     </ThemeProvider>
   </React.StrictMode>
 );
