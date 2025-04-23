@@ -1,46 +1,56 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import Autocomplete from '@mui/material/Autocomplete';
-
-const championNames = [
-    "Aatrox", "Ahri", "Akali", "Akshan", "Alistar", "Amumu", "Anivia", "Annie",
-    "Aphelios", "Ashe", "Aurelion Sol", "Azir", "Bard", "Blitzcrank", "Brand",
-    "Braum", "Caitlyn", "Camille", "Cassiopeia", "Cho'Gath", "Corki", "Darius",
-    "Diana", "Dr. Mundo", "Draven", "Ekko", "Elise", "Evelynn", "Ezreal",
-    "Fiddlesticks", "Fiora", "Fizz", "Galio", "Gangplank", "Garen", "Gnar",
-    "Gragas", "Graves", "Hecarim", "Heimerdinger", "Illaoi", "Irelia", "Ivern",
-    "Janna", "Jarvan IV", "Jax", "Jayce", "Jhin", "Jinx", "Kai'Sa", "Kalista",
-    "Karma", "Karthus", "Kassadin", "Katarina", "Kayle", "Kayn", "Kennen",
-    "Kha'Zix", "Kindred", "Kled", "Kog'Maw", "LeBlanc", "Lee Sin", "Leona",
-    "Lillia", "Lissandra", "Lucian", "Lulu", "Lux", "Malphite", "Malzahar",
-    "Maokai", "Master Yi", "Miss Fortune", "Mordekaiser", "Morgana", "Nami",
-    "Nasus", "Nautilus", "Neeko", "Nidalee", "Nocturne", "Nunu & Willump",
-    "Olaf", "Orianna", "Ornn", "Pantheon", "Poppy", "Pyke", "Qiyana", "Quinn",
-    "Rakan", "Rammus", "Rek'Sai", "Rell", "Renata Glasc", "Renekton", "Rengar",
-    "Riven", "Rumble", "Ryze", "Samira", "Sejuani", "Senna", "Seraphine",
-    "Sett", "Shaco", "Shen", "Shyvana", "Singed", "Sion", "Sivir", "Skarner",
-    "Sona", "Soraka", "Swain", "Sylas", "Syndra", "Tahm Kench", "Taliyah",
-    "Talon", "Taric", "Teemo", "Thresh", "Tristana", "Trundle", "Tryndamere",
-    "Twisted Fate", "Twitch", "Udyr", "Urgot", "Varus", "Vayne", "Veigar",
-    "Vel'Koz", "Vex", "Vi", "Viktor", "Vladimir", "Volibear", "Warwick", "Wukong",
-    "Xayah", "Xerath", "Xin Zhao", "Yasuo", "Yone", "Yorick", "Yuumi", "Zac",
-    "Zed", "Zeri", "Ziggs", "Zilean", "Zoe", "Zyra"
-]
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
 
 export default function ChampionInputForm({ onChampionSelect, activeTeam, activeRole }) {
     const [selectedChampion, setSelectedChampion] = useState(null);
     const [inputValue, setInputValue] = useState('');
+    const [championData, setChampionData] = useState({});
+    const [championNames, setChampionNames] = useState([]);
+    const [ddragonVersion, setDdragonVersion] = useState('15.5.1');
+
+    useEffect(() => {
+        fetch('http://localhost:8000/champions')
+            .then((response) => response.json())
+            .then((data) => {
+                if (data && data.data) {
+                    setChampionData(data.data);
+                    const names = Object.values(data.data)
+                        .map((champ) => champ.name)
+                        .sort();
+                    setChampionNames(names);
+                    const firstChamp = Object.values(data.data)[0];
+                    if (firstChamp && firstChamp.version) {
+                        setDdragonVersion(firstChamp.version);
+                    }
+                }
+            })
+            .catch((error) => console.error('Error fetching champion data:', error));
+    }, []);
+
+    const getChampionIconUrl = (championName) => {
+        if (!championName) return undefined;
+        const champ = Object.values(championData).find((c) => c.name === championName);
+        if (!champ || !champ.image || !champ.image.full) return undefined;
+        return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champ.image.full}`;
+    };
+
+    useEffect(() => {
+        setSelectedChampion(null);
+        setInputValue('');
+    }, [activeTeam, activeRole]);
 
     const handleSubmit = () => {
         if (selectedChampion && activeTeam && activeRole) {
-            console.log(`Selected champion: ${selectedChampion}`);
-            // Placeholder for backend call
-            onChampionSelect( activeTeam, activeRole, selectedChampion )
+            onChampionSelect(activeTeam, activeRole, selectedChampion);
+            console.log(`Selected champion: ${selectedChampion} for ${activeTeam} ${activeRole}`);
         }
     };
 
@@ -51,7 +61,11 @@ export default function ChampionInputForm({ onChampionSelect, activeTeam, active
                 option.toLowerCase().includes(inputValue.toLowerCase())
             );
             if (matches.length > 0) {
-                const firstMatch = matches[0];
+                // Prioritize exact match (case-insensitive)
+                const exactMatch = matches.find(
+                    (option) => option.toLowerCase() === inputValue.toLowerCase()
+                );
+                const firstMatch = exactMatch || matches[0]; // Fallback to first partial match
                 setSelectedChampion(firstMatch);
                 setInputValue(firstMatch);
                 console.log(`Auto-selected champion: ${firstMatch}`);
@@ -76,7 +90,7 @@ export default function ChampionInputForm({ onChampionSelect, activeTeam, active
                     inputValue={inputValue}
                     onInputChange={(event, newValue) => {
                         setInputValue(newValue);
-                        if (!newValue) setSelectedChampion(null); // Reset if input cleared
+                        if (!newValue) setSelectedChampion(null);
                     }}
                     onChange={(event, newValue) => {
                         setSelectedChampion(newValue);
@@ -84,6 +98,25 @@ export default function ChampionInputForm({ onChampionSelect, activeTeam, active
                     }}
                     noOptionsText="No champion found"
                     isOptionEqualToValue={(option, value) => option === value}
+                    renderOption={(props, option) => (
+                        <Box component="li" sx={{ display: 'flex', alignItems: 'center', padding: 1 }} {...props}>
+                            <Avatar
+                                src={getChampionIconUrl(option)}
+                                alt={option}
+                                sx={{
+                                    width: 32,
+                                    height: 32,
+                                    mr: 1,
+                                    '& img': {
+                                        objectFit: 'cover',
+                                        objectPosition: 'center',
+                                        transform: 'scale(1.2)',
+                                    },
+                                }}
+                            />
+                            <Typography variant="body1">{option}</Typography>
+                        </Box>
+                    )}
                     renderInput={(params) => (
                         <TextField
                             {...params}
@@ -99,7 +132,6 @@ export default function ChampionInputForm({ onChampionSelect, activeTeam, active
                               )
                             : options
                     }
-
                     sx={{
                         '& .MuiOutlinedInput-root': {
                             '&.Mui-focused fieldset': {
@@ -113,12 +145,11 @@ export default function ChampionInputForm({ onChampionSelect, activeTeam, active
                             color: '#EDDC91',
                         },
                         '& label': {
-                            color: '#AAAAAA', 
+                            color: '#AAAAAA',
                         },
                         '& .MuiAutocomplete-popupIndicator': {
                             color: 'white',
                         },
-                        // change popup Indicator to #EDDC91 when open
                         '& .MuiAutocomplete-popupIndicatorOpen': {
                             color: '#EDDC91',
                         },

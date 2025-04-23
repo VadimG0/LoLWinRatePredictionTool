@@ -10,4 +10,6 @@ MAX_MATCHES = 15000
 MATCHES_PER_PUUID = 30
 RANKED_SOLO_DUO_QUEUE_ID = 420
 REMAKE_THRESHOLD = 180
-DB_PATH = Path("data/ranked_solo_duo_matchups.db")
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "data" / "ranked_solo_duo_matchups.db"
