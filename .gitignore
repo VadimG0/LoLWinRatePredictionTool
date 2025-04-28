@@ -2,5 +2,6 @@
 last_riotID.csv
 __pycache__/
 .venv/
+venv/
 .env
 *.pyc
