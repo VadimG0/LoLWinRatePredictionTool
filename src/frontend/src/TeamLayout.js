@@ -17,6 +17,8 @@ export default function TeamLayout() {
     });
     const [activeTeam, setActiveTeam] = useState(null);
     const [activeRole, setActiveRole] = useState(null);
+    const [winRate, setWinRate] = useState(null);
+    const [suggestions, setSuggestions] = useState([]);
 
     const handleChampionSelect = (team, role, champion) => {
         if (team === 'Blue Team') {
@@ -62,6 +64,8 @@ export default function TeamLayout() {
                 });
                 const data = await response.json();
                 console.log('Win rate response:', data);
+                setWinRate(data.win_rate);
+                setSuggestions(data.suggested_allies || []);
             } else {
                 console.log('Not enough champions selected to predict win rate.');
             }
@@ -122,7 +126,12 @@ export default function TeamLayout() {
                     blueTeam={blueTeam}
                     redTeam={redTeam}
                 />
-                <StatisticsPanel />
+                <StatisticsPanel 
+                    blueTeam={blueTeam} 
+                    redTeam={redTeam} 
+                    winRate={winRate}
+                    suggestions={suggestions}
+                />
                 <TeamColumn
                     teamName="Red Team"
                     teamColor="#3A1F2E"

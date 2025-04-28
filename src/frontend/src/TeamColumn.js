@@ -1,3 +1,5 @@
+//TeamColumn.js
+
 import React, { useState, useEffect } from 'react';
 import { Box, Stack, Typography, Avatar, Tooltip, CircularProgress } from '@mui/material';
 
@@ -184,6 +186,18 @@ export default function TeamColumn({ teamName, teamColor, textColor, champions, 
                             onMouseEnter={() => handleMouseEnter(role)}
                             onMouseLeave={handleMouseLeave}
                             onClick={() => onRoleClick(teamName, role)}
+                            onDoubleClick={() => {
+                            if (champions[role]) {
+                                window.dispatchEvent(new CustomEvent('openSuggestions', {
+                                detail: {
+                                    champion: champions[role],
+                                    role: role,
+                                    team: teamName,
+                                }
+                                }));
+                            }
+                            }}
+                            
                             sx={{
                                 width: '100%',
                                 cursor: 'pointer',
