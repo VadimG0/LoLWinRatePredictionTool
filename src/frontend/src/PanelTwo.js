@@ -30,11 +30,12 @@ export default function PanelTwo({ onClick, suggestions, selectedChampion, champ
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundImage: 'url(https://img.youtube.com/vi/88Nh8irxfA8/maxresdefault.jpg)',
-                backgroundSize: 'cover',
+                backgroundImage: 'url(/images/arcane.jpg)',
                 backgroundPosition: 'center',
-                backgroundAttachment: 'fixed',
-                color: '#fff'
+                backgroundAttachment: 'scroll',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover', 
+                color: '#fff',
             }}
         >
             <Box sx={{ textAlign: 'center', px: 4, pt: 4 }}>
@@ -103,7 +104,7 @@ export default function PanelTwo({ onClick, suggestions, selectedChampion, champ
                                                     }
                                                 }}
                                             />
-                                            <Typography variant="body2" sx={{ color: '#f9f871' }}>{name}</Typography>
+                                            <Typography variant="body2" sx={{ color: '#f9f871'  }}>{name}</Typography>
                                             <Typography variant="caption" sx={{ color: '#ccc' }}>
                                                 {(confidence * 100).toFixed(2)}%
                                             </Typography>

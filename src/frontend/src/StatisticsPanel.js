@@ -134,15 +134,15 @@ export default function StatisticsPanel({ blueTeam, redTeam, winRate = null, sug
         <Box sx={{
             width: 800,
             height: 600,
-            padding: 4,
+            padding: 1,
             minWidth: 400,
-            borderRadius: 4,
+            borderRadius: 6,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'background.paper',
+            backgroundColor: 'black',
             boxShadow: 3,
-            position: 'relative'
+            position: 'relative',
         }}>
             {renderContent()}
             

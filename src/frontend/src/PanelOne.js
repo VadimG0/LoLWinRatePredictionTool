@@ -20,11 +20,12 @@ export default function PanelOne({ onClick, winRate = 0 }) {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundImage: 'url(https://img.youtube.com/vi/88Nh8irxfA8/maxresdefault.jpg)',
-                backgroundSize: 'cover',
+                backgroundImage: 'url(/images/arcane.jpg)',
                 backgroundPosition: 'center',
-                backgroundAttachment: 'fixed',
-                color: '#fff'
+                backgroundAttachment: 'scroll',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+                color: '#fff',
             }}
         >
             <Box sx={{ textAlign: 'center', px: 4 }}>
